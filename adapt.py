@@ -115,15 +115,14 @@ for f in data['data']:
     edges[hometown][currenttown] += 1
     towns[hometown] = tuple(towns[hometown][:3]) + ((towns[hometown][3] + 1),)
 
-table = []
-for i in range(0, len(towns)):
-    row = [0] * len(towns)
-    if i in edges:
-        for (dest, num) in edges[i].items():
-            row[dest] = num
-    table.append(row)
-
 if sys.argv[1] == 'json':
+    table = []
+    for i in range(0, len(towns)):
+        row = [0] * len(towns)
+        if i in edges:
+            for (dest, num) in edges[i].items():
+                row[dest] = num
+        table.append(row)
     print table
 elif sys.argv[1] == 'csv':
     print 'name,latitude,longitude,population,color'
@@ -135,3 +134,16 @@ elif sys.argv[1] == 'csv':
                     t[3],
                     hashlib.md5(t[2]['name'].encode('utf8')).hexdigest()[:6],
                     ) for t in towns)).encode('utf8')
+elif sys.argv[1] == 'flows.csv':
+    print 'Origin,Dest,Friends Migrations'
+    for i in range(0, len(towns)):
+        if i in edges:
+            for (dest, num) in edges[i].items():
+                if num > 0:
+                    print u'"{}","{}",{}'.format(towns[i][2]['name'],
+                            towns[dest][2]['name'], num).encode('utf8')
+elif sys.argv[1] == 'nodes.csv':
+    print 'Code,Name,Lat,Lon'
+    for t in towns:
+        print u'"{}","{}",{}, {}'.format(t[2]['name'], t[2]['name'], t[0],
+                t[1]).encode('utf8')
