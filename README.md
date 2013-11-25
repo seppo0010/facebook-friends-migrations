@@ -6,7 +6,8 @@ Graphicate your Facebook Friends migrations. Where are they from and where they 
 Instructions
 ==
 
-FQL to get your friends' information:
+Run the following FQL query to get your friends' information. You can run the
+query from this URL: https://developers.facebook.com/tools/explorer
 
     SELECT name, current_location, hometown_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me())
 
