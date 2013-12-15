@@ -96,7 +96,7 @@
           points.addFeatures(features);
           map.addLayers([points]);
           map.setCenter(new OpenLayers.LonLat(0, 0), 1);
-        }, {q: 'SELECT name, current_location, hometown_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = 775204198)'});
+        }, {q: 'SELECT name, current_location, hometown_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me())'});
       } else {
         alert('No access, no map');
       }
