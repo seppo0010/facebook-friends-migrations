@@ -1,0 +1,120 @@
+<html>
+<head>
+<style>* { margin: 0; padding: 0; }</style>
+<title></title>
+</head>
+<body>
+<div id="map" style="height:100%; width: 100%;"></div>
+<script src="js/openlayers/OpenLayers.js"></script>
+<script>
+  var SIMILAR_LOCATION_THRESHOLD = 1;
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId: '698433166886453',
+      status: true,
+      xfbml: true
+    });
+
+    FB.login(function(response) {
+      if (response.authResponse) {
+        FB.api('/fql', function(response) {
+          var point_for_location = function(location) {
+            var fromProjection = new OpenLayers.Projection("EPSG:4326");
+            var toProjection = new OpenLayers.Projection("EPSG:900913");
+            var position = new OpenLayers.LonLat(location.longitude, location.latitude).transform( fromProjection, toProjection);
+            var point = new OpenLayers.Geometry.Point(position.lon, position.lat);
+            return point;
+          };
+          map = new OpenLayers.Map("map");
+          map.addLayer(new OpenLayers.Layer.OSM());
+
+          var migrations = [];
+          var max_size = 1;
+          for (var i in response.data) {
+            var source = response.data[i].hometown_location;
+            var target = response.data[i].current_location;
+            if (!source || !target) {
+                continue;
+            }
+
+            var migration = [source, target, 1];
+            var diff_lat = (migration[0].latitude - migration[1].latitude);
+            var diff_lon = (migration[0].longitude - migration[1].longitude);
+            if (diff_lat * diff_lat + diff_lon * diff_lon < SIMILAR_LOCATION_THRESHOLD) {
+              // Lives in the same city
+              continue;
+            }
+
+            var added = false;
+            for (var m in migrations) {
+              var diff_lat = (migration[0].latitude - migrations[m][0].latitude);
+              var diff_lon = (migration[0].longitude - migrations[m][0].longitude);
+              if (diff_lat * diff_lat + diff_lon * diff_lon < SIMILAR_LOCATION_THRESHOLD) {
+                var diff_lat = (migration[1].latitude - migrations[m][1].latitude);
+                var diff_lon = (migration[1].longitude - migrations[m][1].longitude);
+                if (diff_lat * diff_lat + diff_lon * diff_lon < SIMILAR_LOCATION_THRESHOLD) {
+                  migrations[m][2] += 1;
+                  added = true;
+                  if (migrations[m][2] > max_size) {
+                    max_size = migrations[m][2];
+                  }
+                  break;
+                }
+              }
+            }
+            if (!added) {
+              migrations.push(migration);
+            }
+          }
+
+
+          var features = [];
+          for (var m in migrations) {
+            features.push(new OpenLayers.Feature.Vector(
+                  new OpenLayers.Geometry.LineString([
+                    point_for_location(migrations[m][0]),
+                    point_for_location(migrations[m][1])
+                  ]), {
+                    // Less than 0.2 is hardly visible
+                    opacity: Math.max(migrations[m][2] / max_size, 0.2)
+                  }));
+          }
+
+          var myStyles = new OpenLayers.StyleMap({
+              "default": new OpenLayers.Style({
+                  strokeOpacity: "${opacity}",
+                  strokeColor: "#ff9933",
+                  strokeWidth: 1,
+                  graphicZIndex: 1
+              })
+          });
+
+          var points = new OpenLayers.Layer.Vector("Points", {
+              styleMap: myStyles,
+              rendererOptions: {zIndexing: true}
+          });
+          points.addFeatures(features);
+          map.addLayers([points]);
+          map.setCenter(new OpenLayers.LonLat(0, 0), 1);
+        }, {q: 'SELECT name, current_location, hometown_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = 775204198)'});
+      } else {
+        alert('No access, no map');
+      }
+    }, {scope: 'user_location,user_hometown,friends_location,friends_hometown'});
+  };
+
+  (function(){
+     if (document.getElementById('facebook-jssdk')) {return;}
+
+     var firstScriptElement = document.getElementsByTagName('script')[0];
+
+     var facebookJS = document.createElement('script'); 
+     facebookJS.id = 'facebook-jssdk';
+
+     facebookJS.src = '//connect.facebook.net/en_US/all.js';
+
+     firstScriptElement.parentNode.insertBefore(facebookJS, firstScriptElement);
+   }());
+</script>
+</body>
+</html>
