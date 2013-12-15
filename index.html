@@ -19,13 +19,13 @@
       if (response.authResponse) {
         FB.api('/fql', function(response) {
           var point_for_location = function(location) {
-            var fromProjection = new OpenLayers.Projection("EPSG:4326");
-            var toProjection = new OpenLayers.Projection("EPSG:900913");
+            var fromProjection = new OpenLayers.Projection('EPSG:4326');
+            var toProjection = new OpenLayers.Projection('EPSG:900913');
             var position = new OpenLayers.LonLat(location.longitude, location.latitude).transform( fromProjection, toProjection);
             var point = new OpenLayers.Geometry.Point(position.lon, position.lat);
             return point;
           };
-          map = new OpenLayers.Map("map");
+          map = new OpenLayers.Map('map');
           map.addLayer(new OpenLayers.Layer.OSM());
 
           var migrations = [];
@@ -81,15 +81,15 @@
           }
 
           var myStyles = new OpenLayers.StyleMap({
-              "default": new OpenLayers.Style({
-                  strokeOpacity: "${opacity}",
-                  strokeColor: "#ff9933",
+              'default': new OpenLayers.Style({
+                  strokeOpacity: '${opacity}',
+                  strokeColor: '#ff9933',
                   strokeWidth: 1,
                   graphicZIndex: 1
               })
           });
 
-          var points = new OpenLayers.Layer.Vector("Points", {
+          var points = new OpenLayers.Layer.Vector('Points', {
               styleMap: myStyles,
               rendererOptions: {zIndexing: true}
           });
