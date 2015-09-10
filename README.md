@@ -1,15 +1,15 @@
-Facebook friends migration
-===
+# Facebook friends migration
 
 Graphicate your Facebook Friends migrations. Where are they from and where they live now.
 
-Instructions
-==
+## Instructions
 
-Run the following FQL query to get your friends' information. You can run the
-query from this URL: https://developers.facebook.com/tools/explorer
-
-    SELECT name, current_location, hometown_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me())
+Extract a list of your friends identifiers by going to
+https://facebook.com/<you>/friends, open your developer console, and scroll
+all the way down until all your friends are visible. In the console, go
+to the Network tab and filter by "AllFriendsApp" or "?filter". Copy all
+response body in a temporary file and run "extract-friends.py" using that file
+path as an argument.
 
 Save that as "friends.json", and run
 
