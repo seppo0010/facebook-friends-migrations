@@ -9,10 +9,11 @@ https://facebook.com/<you>/friends, open your developer console, and scroll
 all the way down until all your friends are visible. In the console, go
 to the Network tab and filter by "AllFriendsApp" or "?filter". Copy all
 response body in a temporary file and run "extract-friends.py" using that file
-path as an argument.
+path as an argument. Save that as "friends-nolocation.json".
 
-Save that as "friends.json", and run
+Run
 
+    python add_locations.py friends-nolocation.json > friends.json
     python adapt.py json > public/d3chord/matrix.json && python adapt.py csv > public/d3chord/cities.csv
 
 Then open public/d3chord/index.html
