@@ -64,8 +64,10 @@ def get_name(name):
     return name
 
 
-for f in data['data']:
+for f in data:
     hometown, currenttown = None, None
+    if 'hometown_location' not in f or 'current_location' not in f:
+        continue
     if None in (f['hometown_location'], f['current_location']):
         continue
     if 'Llanfairpwllgwyngyllgogerychwyrndrobwllllantysilio, Gwynedd, United Kingdom' in (f['hometown_location']['name'], f['current_location']['name']):
